@@ -1,13 +1,18 @@
 "use strict"
+
 const redis = require('./redisDB');
 const headers = require('./headersCORS');
+
 function toJson(item, index, arr) {
   arr[index] = JSON.parse(item);
 }
+
 exports.handler = async (event, context) => {
+
   if (event.httpMethod == "OPTIONS") {
     return { statusCode: 200, headers, body: "OK" };
   }
+
   try {
     
     redis.on("connect", function() {
@@ -15,7 +20,10 @@ exports.handler = async (event, context) => {
     });
    
    const data = JSON.parse(event.body);
+
    await redis.put(data.id,event.body);
+   await redis.incr('book_N');
+    
    return { statusCode: 200, headers, body: 'OK'};
   } catch (error) {
     console.log(error);
